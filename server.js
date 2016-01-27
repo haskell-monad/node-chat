@@ -1,6 +1,4 @@
 //http://192.168.99.60:3000/
-
-
 var Session = require('express-session');
 var SessionStore = require('session-file-store')(Session);
 var session = Session({
@@ -38,17 +36,14 @@ function loadHtml(fileName){
 }
 
 app.get('/',function(req,res){
-	console.log("请求***/******");
 	if( req.session.username && req.session.username !== ''){
 		res.redirect('/chat');
 	}else{
-		//去登陆
 		res.end(loadHtml('login.html'));
 	}
 });
 
 app.get('/chat',function(req,res){
-	console.log("请求**/chat******");
 	if( req.session.username && req.session.username !== ''){
 		res.render('index',{username:req.session.username});
 	}else{
@@ -58,7 +53,6 @@ app.get('/chat',function(req,res){
 
 
 app.post('/login',function(req,res){
-	console.log("请求***/login******");
 	var username = req.body.username;
 	console.log(username+" 发起登录post请求");
 	if(username && username !== ''){
@@ -73,10 +67,7 @@ app.post('/login',function(req,res){
 	}
 });
 
-var queue = new Array();
 var msgQueue = new Array();
-//a.unshift(1);
-//a.pop()
 
 
 var io = require('socket.io')(server);
@@ -84,28 +75,6 @@ io.use(function(socket,next){
 	console.log("*********1********************");
 	session(socket.handshake, {}, next);
 })
-//io.use(function(socket, next) {
-	//console.log("*********2********************");
-	//console.log("*********3********************: "+socket.handshake.session.username);
-	//next();
-		////var handshakeData = socket.request;
-		////handshakeData.cookie = parseCookie(handshakeData.headers.cookie)
-		////var connect_sid = handshakeData.cookie['connect.sid'];
-		////console.log("connect_sid: "+connect_sid);
-		////if (connect_sid) {
-			////if (socket.handshake.session.connect_sid == null || typeof(socket.handshake.session.connect_sid) == "undefined"){
-				////console.log("connot grab a connect_sid: "+connect_sid);
-				////next(new Error('not authorized');
-			////}else{
-				////socket.handshake.session.connect_sid = connect_sid;
-				////console.log("get a connect_sid: "+connect_sid);
-				////next();
-			////}
-		////}else {
-			////console.log("not authorized: "+connect_sid);
-			////next(new Error('not authorized');
-		////}
-//});
 
 Array.prototype.indexOf = function (obj) {  
 	for (var i = 0; i < this.length; i++) {  
@@ -137,34 +106,20 @@ io.sockets.on('connection', function (socket){
 	refresh_msg();
     socket.on('message',function(message){
 		console.log("服务器接收到【"+username+"】的消息: "+message);
-		//var myQueue = queue[username];
-		//if (myQueue == null || typeof(myQueue) == 'undefined'){
-			//myQueue = new Array();
-		//}
-		//myQueue.unshift(message);
-		//queue[username] = myQueue;
 		msgQueue.push(username+":"+message);//所有的消息
         socket.broadcast.emit('message',message); 
     })
 
     //socket.on('private message',function(to, msg, fn){ 
-        //var target = usersWS[to]; 
+        //var target = onlineUsers[to]; 
         //if (target) { 
-            //fn(true); 
             //target.emit('private message', username+'[sixin]', msg); 
-        //} 
-        //else { 
-            //fn(false) 
+        //}else { 
             //socket.emit('message error', to, msg); 
         //} 
     //}); 
 
 	socket.on('disconnect', function(){
-
-		//delUsers.splice(username,1);
-		//delUsers[username] = socket;
-		//socket.index = username;
-		delUsers.splice(username,1);
 		console.log(username+" 离开聊天室");
 		socket.broadcast.emit('system message',username+" 离开聊天室");
 		refresh_online();
