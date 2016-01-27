@@ -1,0 +1,19 @@
+{
+  "name": "chat",
+  "version": "0.0.1",
+  "description": "chat server",
+  "dependencies": {
+    "body-parser": "^1.14.2",
+    "connect": "^3.4.1",
+    "cookie-parser": "^1.4.1",
+    "cookie-session": "^1.2.0",
+    "ejs": "^2.4.1",
+    "express": "^4.13.4",
+    "express-session": "^1.13.0",
+    "mongo": "^0.1.0",
+    "mongoose": "^4.3.7",
+    "session-file-store": "0.0.24",
+    "socket.io": "^1.4.4",
+    "socket.io-express-session": "^0.1.3"
+  }
+}

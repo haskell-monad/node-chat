@@ -1,0 +1,237 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>尽情的聊吧</title>
+        <link rel="stylesheet" href="css/index.css">
+		<link rel="stylesheet" href="css/chat.css">
+		<link rel="stylesheet" href="css/bootstrap.css">
+		<script type="text/javascript" src="js/socket.io.js"></script>
+		<script type="text/javascript" src="js/jquery.js"></script>
+		<script type="text/javascript" src="js/jquery.cookie.js"></script>
+		<script type="text/javascript" src="js/bootstrap.js"></script>
+		<script type="text/javascript" src="js/chat.js"></script>
+		<script type="text/javascript">
+				$(document).ready(function(){
+						
+						var chat = new $.chat();
+						chat.init();
+						console.log("初始化chat对象成功.");
+						//initData();
+						//显示隐藏频道列表项、在线用户项
+						$("button.label-item").click(function(){
+							var group = $(this).next("ul.list-group");
+							if (group.hasClass("hide-ul")){
+								group.removeClass("hide-ul");
+								group.children("li").show();
+							}else{
+								group.addClass("hide-ul");
+								group.children("li").hide();
+							}
+						})
+						//确定设置频道
+						$("#confirm-channelname").click(function(){
+							var channelname = $("#channelname").val();
+							if (channelname != null && channelname != ''){
+								$('#new-channel').modal('hide');
+							}
+						})
+						
+						//发送消息
+						$("#send_msg").click(function(){
+							var msg = $("#meg_info").val();
+							if(msg != null && msg != ''){
+								console.log("发送消息: "+msg);
+								chat.sendMessage(msg);
+								$("#meg_info").val("");
+								var div = document.getElementById("msg_content");
+								div.scrollTop = div.scrollHeight;
+								$("#meg_info").focus();
+							}
+						})
+
+						//清空消息
+						$("#clear_msg").click(function(){
+							$("#meg_info").val("");
+						})
+						$("#meg_info").keypress(function(e) {
+							if(e.ctrlKey && e.which == 13 || e.which == 10) {
+								var msg = $("#meg_info").val();
+								if(msg != null && msg != ''){
+									console.log("发送消息: "+msg);
+									chat.sendMessage(msg);
+									$("#meg_info").val("");
+									var div = document.getElementById("msg_content");
+									div.scrollTop = div.scrollHeight;
+								}
+							}
+						})
+						$("#face_div").addClass("face_hide");
+						$("#face_div").hide();
+						$("#face_msg").click(function(){
+							var flag = $("#face_div").hasClass("face_hide");
+							if(flag){
+								$("#face_div").removeClass("face_hide");
+								$("#face_div").show();
+							}else{
+								$("#face_div").addClass("face_hide");
+								$("#face_div").hide();
+							}
+						})
+						initFace();
+
+				}) 
+				//日志信息
+				function log(info){
+					var leg = $("#logInfo > p").length;
+					if (leg > 10){
+						$("#logInfo > p:last").remove();
+					}
+					$("#logInfo").prepend("<p>log: "+info+"</p>");
+				}
+				var face_array = new Array();
+				face_array["xy2"] = 158;
+				face_array["qbl"] = 106;
+				function initFace(){
+					var html = "";
+					var n = 0;
+					for(var i in face_array){
+						if(n == 0){
+							html = "<li role='presentation' class='active'><a href='#"+i+"' aria-controls='"+i+"' role='tab' data-toggle='tab'>"+i+"</a></li>";	
+							$("#face_panel").append("<div role='tabpanel' class='tab-pane active' id='"+i+"'></div>");
+						}else{
+							html = "<li role='presentation'><a href='#"+i+"' aria-controls='"+i+"' role='tab' data-toggle='tab'>"+i+"</a></li>";	
+							$("#face_panel").append("<div role='tabpanel' class='tab-pane' id='"+i+"'></div>");
+						}
+						$("#face_ul").append(html);
+						var leg = face_array[i];
+						for(var j=1;j<=leg;j++){
+							html = "<img src='face/"+i+"/"+i+"_"+j+".gif' title='"+i+"/"+i+"_"+j+"'/>";
+							$("#"+i+"").append(html);
+						}
+						n++;
+					}
+					$("div.tab-pane > img").click(function(){
+						var title = $(this).attr("title");
+						if(title != null && title != ''){
+							$("#meg_info").val($("#meg_info").val()+"[face:"+title+"]");
+							$("#face_div").addClass("face_hide");
+							$("#face_div").hide();
+							$("#meg_info").focus();
+						}
+					});
+				}
+		</script>
+    </head>
+    <body>
+		<div class="container-fluid" id="data-content">
+				<div class="row">
+						<div class="col-md-12">
+							<nav class="navbar navbar-default">
+								  <div class="container-fluid">
+										  <a class="navbar-brand" href="#"><img alt="Brand" src="img/flag.png"></a>
+										  <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target=".new-channel">创建频道</button>
+										  <p class="navbar-text navbar-right">欢迎您, <a href="#" class="navbar-link"><%= username %></a></p>
+								  </div>
+							</nav>
+						</div>
+						<div class="col-md-2">
+							<button type="button" class="btn btn-primary btn-lg label-item" style="width:218px">频道列表</button>
+								<ul class="list-group channel-list">
+									  <!--
+									  <li class="list-group-item list-item"><span class="badge">13</span>奥巴马</li>
+									  -->
+								</ul>
+								<button type="button" class="btn btn-primary btn-lg label-item" style="width:218px">在线用户</button>
+								<ul class="list-group online-list">
+									  <!--
+									  <li class="list-group-item list-item"><span class="badge">13</span>奥巴马</li>
+									  -->
+								</ul>
+						</div>
+						<div class="col-md-8" id="chat">
+						      <div class="test_box" id="msg_content">
+									<!--
+									<div class="leftd">
+									  <div class="speech left"> 你好!在晚上好!我在!明天早上8点要开会!晚上好!我在!明天早上8点要开会!晚上好!我在!明天早上8点要开会!晚上好!我在!明天早上8点要开会!晚上好晚上好!我在!明天早上8点要开会!晚上好!我在!明天早上8点要开会! </div>
+									</div>
+									<div class="rightd">
+										<div class="rightimg"> </div>
+										<div class="speech right"> 晚上好!我在!明天早上8点要开会!晚上好!我在!明天早上8点要开会!晚上好!我在!明天早上8点要开会!晚上好!我在!明天早上8点要开会!晚上好晚上好!我在!明天早上8点要开会!晚上好!我在!明天早上8点要开会!晚上好!我在!明天早上8点要开会!晚上好!我在!明天早上8点要开会!晚上好晚上好!我在!明天早上8点要开会!晚上好!我在!明天早上8点要开会!晚上好晚上好!我在!明天早上8点要开会!晚上好!我在!明天早上8点要开会!晚上好晚上好!我在!明天早上8点要开会!晚上好!我在!明天早上8点要开会!晚上好晚上好!我在!明天早上8点要开会!晚上好!我在!明天早上8点要开会!晚上好晚上好!我在!明天早上8点要开会!晚上好!我在!明天早上8点要开会!晚上好晚上好!我在!明天早上8点要开会!晚上好!我在!明天早上8点要开会!晚上好晚上好!我在!明天早上8点要开会!晚上好!我在!明天早上8点要开会!晚上好 </div>
+									</div>
+									<div class="leftd">
+									  <div class="speech left"> 请把资料准备好! </div>
+									</div>
+									<div class="rightd">
+										<div class="speech right"> 好的!</br>
+											没问题!</br>
+											搞定了 
+										</div>
+									</div>
+									-->
+							</div>
+							<div id="face_div">
+								  <ul class="nav nav-tabs" role="tablist" id="face_ul">
+									<!--
+									    <li role="presentation" class="active">
+										<a href="#xy2" aria-controls="xy2" role="tab" data-toggle="tab">大话西游2</a>
+									    </li>
+									-->
+								  </ul>
+								  <div class="tab-content" id="face_panel">
+									<!--
+										<div role="tabpanel" class="tab-pane active" id="xy2"></div>
+									-->
+								  </div>
+							 </div>
+							<div>
+								<div class="row">
+										<div class="col-xs-3">
+											<button type="button" class="btn btn-primary btn-block" id="face_msg">表情</button>
+										</div>
+										<div class="col-xs-3">
+											<button type="button" class="btn btn-primary btn-block" id="img_msg">图片</button>
+										</div>
+										<div class="col-xs-3">
+											<button type="button" class="btn btn-success btn-block" id="send_msg">发送</button>
+										</div>
+										<div class="col-xs-3">
+											<button type="button" class="btn btn-success btn-block" id="clear_msg">清空</button>
+										</div>
+										<div class="col-xs-12">
+											<textarea class="form-control" id="meg_info" rows="3"></textarea>
+										</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-2" id="logInfo">
+						</div>
+				</div>
+		</div>
+		<!--弹出层-->
+		<div id="new-channel" class="modal fade new-channel " tabindex="-1" role="dialog" aria-labelledby="创建频道">
+			  <div class="modal-dialog" role="document">
+					<div class="modal-content">
+						  <div class="modal-header">
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+								<h4 class="modal-title" id="exampleModalLabel">创建频道</h4>
+						  </div>
+						  <div class="modal-body">
+								<form>
+									  <div class="form-group">
+										<label for="channelname" class="control-label">频道名称:</label>
+										<input type="text" class="form-control" id="channelname" name="channelname">
+									  </div>
+								</form>
+						  </div>
+						  <div class="modal-footer">
+								<button type="button" class="btn btn-default" data-dismiss="modal">放弃</button>
+								<button type="button" class="btn btn-primary" id="confirm-channelname">确定</button>
+						  </div>
+					</div>
+			  </div>
+		</div>
+    </body>
+</html>
