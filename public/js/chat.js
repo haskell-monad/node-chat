@@ -8,7 +8,11 @@ String.prototype.endWith=function(str){
 } 
 
 function sendMyMsg(msg){
-	var html = "<div class='rightd'><div class='rightimg'> </div><div class='speech right'>"+msg+"</div></div>";
+	var color = $("#msg_info").css("color");
+	if (color == null || color == '' || typeof(color) == 'undefined'){
+		color = "#000000";
+	}
+	var html = "<div class='rightd'><div class='rightimg'> </div><div class='speech right' style='color:"+color+"'>"+msg+"</div></div>";
 	$("#msg_content").append(html);
 	var div = document.getElementById("msg_content");
 	div.scrollTop = div.scrollHeight;
@@ -62,7 +66,7 @@ function sendOtherMsg(msg){
 					$("ul.online-list").append(html);
 				}
 				$("ul.online-list > li").on('click',function(){
-					$("#meg_info").val($("#meg_info").val()+"@"+$(this).text());
+					$("#msg_info").val($("#msg_info").val()+"@"+$(this).text());
 				})
 			});
 		};

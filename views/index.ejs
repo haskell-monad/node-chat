@@ -8,10 +8,12 @@
         <link rel="stylesheet" href="css/index.css">
 		<link rel="stylesheet" href="css/chat.css">
 		<link rel="stylesheet" href="css/bootstrap.css">
+		<link rel="stylesheet" href="css/jquery.minicolors.css">
 		<script type="text/javascript" src="js/socket.io.js"></script>
 		<script type="text/javascript" src="js/jquery.js"></script>
 		<script type="text/javascript" src="js/jquery.cookie.js"></script>
 		<script type="text/javascript" src="js/bootstrap.js"></script>
+		<script type="text/javascript" src="js/jquery.minicolors.min.js"></script>
 		<script type="text/javascript" src="js/chat.js"></script>
 		<script type="text/javascript">
 				$(document).ready(function(){
@@ -41,48 +43,74 @@
 						
 						//发送消息
 						$("#send_msg").click(function(){
-							var msg = $("#meg_info").val();
+							var msg = $("#msg_info").val();
 							if(msg != null && msg != ''){
 								console.log("发送消息: "+msg);
 								chat.sendMessage(msg);
-								$("#meg_info").val("");
+								$("#msg_info").val("");
 								var div = document.getElementById("msg_content");
 								div.scrollTop = div.scrollHeight;
-								$("#meg_info").focus();
+								$("#msg_info").focus();
 							}
 						})
-
 						//清空消息
 						$("#clear_msg").click(function(){
-							$("#meg_info").val("");
+							$("#msg_info").val("");
 						})
-						$("#meg_info").keypress(function(e) {
+						$("#msg_info").keypress(function(e) {
 							if(e.ctrlKey && e.which == 13 || e.which == 10) {
-								var msg = $("#meg_info").val();
+								var msg = $("#msg_info").val();
 								if(msg != null && msg != ''){
 									console.log("发送消息: "+msg);
 									chat.sendMessage(msg);
-									$("#meg_info").val("");
+									$("#msg_info").val("");
 									var div = document.getElementById("msg_content");
 									div.scrollTop = div.scrollHeight;
 								}
 							}
 						})
-						$("#face_div").addClass("face_hide");
-						$("#face_div").hide();
+						//表情
+						hideFace();
 						$("#face_msg").click(function(){
 							var flag = $("#face_div").hasClass("face_hide");
 							if(flag){
 								$("#face_div").removeClass("face_hide");
 								$("#face_div").show();
 							}else{
-								$("#face_div").addClass("face_hide");
-								$("#face_div").hide();
+								hideFace();
 							}
 						})
+						//初始化表情
 						initFace();
-
+						//字体选择
+						$("#font-color").minicolors({
+							control: $(this).attr('data-control') || 'hue',
+							defaultValue: $(this).attr('data-defaultValue') || '',
+							inline: $(this).attr('data-inline') === 'true',
+							letterCase: $(this).attr('data-letterCase') || 'lowercase',
+							opacity: $(this).attr('data-opacity'),
+							position: $(this).attr('data-position') || 'bottom left',
+							change: function(hex, opacity) {
+								if( !hex ) return;
+								if( opacity ) hex += ', ' + opacity;
+								try {
+									console.log(hex);
+									$("#msg_info").css({"color": hex});
+									
+								}catch(e){}
+							},
+							theme: 'bootstrap'
+						});
+						$("div.test_box").click(function(){
+							hideFace();
+						});
 				}) 
+				
+				function hideFace(){
+					$("#face_div").addClass("face_hide");
+					$("#face_div").hide();
+				}
+
 				//日志信息
 				function log(info){
 					var leg = $("#logInfo > p").length;
@@ -116,10 +144,10 @@
 					$("div.tab-pane > img").click(function(){
 						var title = $(this).attr("title");
 						if(title != null && title != ''){
-							$("#meg_info").val($("#meg_info").val()+"[face:"+title+"]");
+							$("#msg_info").val($("#msg_info").val()+"[face:"+title+"]");
 							$("#face_div").addClass("face_hide");
 							$("#face_div").hide();
-							$("#meg_info").focus();
+							$("#msg_info").focus();
 						}
 					});
 				}
@@ -188,11 +216,12 @@
 							 </div>
 							<div>
 								<div class="row">
+										
 										<div class="col-xs-3">
-											<button type="button" class="btn btn-primary btn-block" id="face_msg">表情</button>
+											<input type="text" class="form-control" id="font-color" data-position="top left" value="#000000">
 										</div>
 										<div class="col-xs-3">
-											<button type="button" class="btn btn-primary btn-block" id="img_msg">图片</button>
+											<button type="button" class="btn btn-primary btn-block" id="face_msg">表情</button>
 										</div>
 										<div class="col-xs-3">
 											<button type="button" class="btn btn-success btn-block" id="send_msg">发送</button>
@@ -201,7 +230,7 @@
 											<button type="button" class="btn btn-success btn-block" id="clear_msg">清空</button>
 										</div>
 										<div class="col-xs-12">
-											<textarea class="form-control" id="meg_info" rows="3"></textarea>
+											<textarea class="form-control" id="msg_info" rows="3"></textarea>
 										</div>
 								</div>
 							</div>
