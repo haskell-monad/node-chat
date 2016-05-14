@@ -36,7 +36,7 @@ function loadHtml(fileName){
 }
 
 app.get('/',function(req,res){
-	if( req.session.username && req.session.username !== ''){
+	if( req.session.username && req.session.username !== '' && typeof(username) != 'undefined'){
 		res.redirect('/chat');
 	}else{
 		res.end(loadHtml('login.html'));
@@ -44,7 +44,7 @@ app.get('/',function(req,res){
 });
 
 app.get('/chat',function(req,res){
-	if( req.session.username && req.session.username !== ''){
+	if( req.session.username && req.session.username !== '' && typeof(username) != 'undefined'){
 		res.render('index',{username:req.session.username});
 	}else{
 		res.redirect('/');
@@ -100,6 +100,7 @@ io.sockets.on('connection', function (socket){
 	var refresh_msg = function(){
 		socket.emit('all messsage',username,msgQueue); 
 	}
+
 	onlineUsers[username] = socket;
 	io.sockets.emit('system message',username+" 加入到聊天室");
 	refresh_online();

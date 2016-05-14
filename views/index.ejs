@@ -53,6 +53,19 @@
 								$("#msg_info").focus();
 							}
 						})
+						$("#msg_info").keyup(function(){
+							if(event.keyCode == 13){
+								var msg = $("#msg_info").val();
+								if(msg != null && msg != ''){
+									console.log("发送消息: "+msg);
+									chat.sendMessage(msg);
+									$("#msg_info").val("");
+									var div = document.getElementById("msg_content");
+									div.scrollTop = div.scrollHeight;
+									$("#msg_info").focus();
+								}
+							}
+						});
 						//清空消息
 						$("#clear_msg").click(function(){
 							$("#msg_info").val("");
